@@ -94,7 +94,6 @@
         <div class="icon success-icon">✓</div>
         <h1>Verifikasi Berhasil!</h1>
         <p>Email Anda telah berhasil diverifikasi. Akun Anda kini sudah aktif dan siap digunakan.</p>
-        <a href="myapp://home" class="btn" id="open-app-btn">Buka Aplikasi</a>
     </div>
 
     <div id="error-state" class="card">
@@ -105,8 +104,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Supabase mengirimkan token di URL fragment (setelah tanda #)
-            // Dan kadang mengirimkan error di URL query (setelah tanda ?)
             const hashString = window.location.hash.substring(1);
             const queryString = window.location.search;
 
@@ -120,35 +117,30 @@
             // Cek parameter sukses
             const accessToken = hashParams.get('access_token');
             const type = hashParams.get('type');
+            
+            const code = queryParams.get('code');
 
             const loadingState = document.getElementById('loading-state');
             const successState = document.getElementById('success-state');
             const errorState = document.getElementById('error-state');
             const errorMessageEl = document.getElementById('error-message');
 
-            // Simulasi loading sebentar agar transisi terlihat mulus
             setTimeout(() => {
                 loadingState.style.display = 'none';
 
                 if (error) {
-                    // Jika ada error (misal: expired link)
                     errorState.style.display = 'block';
                     if (errorDescription) {
                         errorMessageEl.textContent = errorDescription.replace(/\+/g, ' ');
                     }
-                } else if (accessToken || type === 'signup') {
-                    // Jika berhasil
+                } else if (accessToken || type === 'signup' || code) {
                     successState.style.display = 'block';
-                    
-                    // Opsional: Ganti URL tombol dengan Deep Link aplikasi kamu
-                    // document.getElementById('open-app-btn').href = "namaplikasi://login";
                 } else {
-                    // Jika URL diakses langsung tanpa parameter apapun
                     errorState.style.display = 'block';
                     errorMessageEl.textContent = "Link verifikasi tidak lengkap. Pastikan Anda mengklik link langsung dari email.";
                 }
             }, 800);
         });
     </script>
-</body>
+   </body>
 </html>
