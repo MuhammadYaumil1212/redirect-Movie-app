@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Akun</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --success: #10B981;
+            --error: #EF4444;
+            --bg: #F3F4F6;
+            --text: #1F2937;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            display: none; /* Disembunyikan secara default oleh JS nantinya */
+        }
+
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-icon { color: var(--success); }
+        .error-icon { color: var(--error); }
+        .loading-icon { color: var(--primary); }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: #6B7280;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover { background-color: #4338CA; }
+
+        /* Loader Animation */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loading-state" class="card" style="display: block;">
+        <div class="spinner"></div>
+        <h1>Memverifikasi...</h1>
+        <p>Mohon tunggu sebentar, kami sedang memverifikasi link Anda.</p>
+    </div>
+
+    <div id="success-state" class="card">
+        <div class="icon success-icon">✓</div>
+        <h1>Verifikasi Berhasil!</h1>
+        <p>Email Anda telah berhasil diverifikasi. Akun Anda kini sudah aktif dan siap digunakan.</p>
+        <a href="myapp://home" class="btn" id="open-app-btn">Buka Aplikasi</a>
+    </div>
+
+    <div id="error-state" class="card">
+        <div class="icon error-icon">✕</div>
+        <h1>Verifikasi Gagal</h1>
+        <p id="error-message">Link verifikasi tidak valid atau sudah kedaluwarsa. Silakan minta link baru melalui aplikasi.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Supabase mengirimkan token di URL fragment (setelah tanda #)
+            // Dan kadang mengirimkan error di URL query (setelah tanda ?)
+            const hashString = window.location.hash.substring(1);
+            const queryString = window.location.search;
+
+            const hashParams = new URLSearchParams(hashString);
+            const queryParams = new URLSearchParams(queryString);
+
+            // Cek parameter error
+            const error = hashParams.get('error') || queryParams.get('error');
+            const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
+            
+            // Cek parameter sukses
+            const accessToken = hashParams.get('access_token');
+            const type = hashParams.get('type');
+
+            const loadingState = document.getElementById('loading-state');
+            const successState = document.getElementById('success-state');
+            const errorState = document.getElementById('error-state');
+            const errorMessageEl = document.getElementById('error-message');
+
+            // Simulasi loading sebentar agar transisi terlihat mulus
+            setTimeout(() => {
+                loadingState.style.display = 'none';
+
+                if (error) {
+                    // Jika ada error (misal: expired link)
+                    errorState.style.display = 'block';
+                    if (errorDescription) {
+                        errorMessageEl.textContent = errorDescription.replace(/\+/g, ' ');
+                    }
+                } else if (accessToken || type === 'signup') {
+                    // Jika berhasil
+                    successState.style.display = 'block';
+                    
+                    // Opsional: Ganti URL tombol dengan Deep Link aplikasi kamu
+                    // document.getElementById('open-app-btn').href = "namaplikasi://login";
+                } else {
+                    // Jika URL diakses langsung tanpa parameter apapun
+                    errorState.style.display = 'block';
+                    errorMessageEl.textContent = "Link verifikasi tidak lengkap. Pastikan Anda mengklik link langsung dari email.";
+                }
+            }, 800);
+        });
+    </script>
+</body>
+</html>
