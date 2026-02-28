@@ -118,13 +118,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const errorMessageEl = document.getElementById('error-message');
 
     try {
-        const { data, error } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.exchangeCodeForSession(
+            window.location.href
+        );
+
         if (error) throw error;
+
         if (data.session) {
             successState.style.display = 'block';
         } else {
             throw new Error("Token tidak valid atau sudah expired.");
         }
+
     } catch (err) {
         errorState.style.display = 'block';
         errorMessageEl.textContent = err.message;
