@@ -102,45 +102,37 @@
         <p id="error-message">Link verifikasi tidak valid atau sudah kedaluwarsa. Silakan minta link baru melalui aplikasi.</p>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const hashString = window.location.hash.substring(1);
-            const queryString = window.location.search;
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-            const hashParams = new URLSearchParams(hashString);
-            const queryParams = new URLSearchParams(queryString);
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
 
-            // Cek parameter error
-            const error = hashParams.get('error') || queryParams.get('error');
-            const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
-            
-            // Cek parameter sukses
-            const accessToken = hashParams.get('access_token');
-            const type = hashParams.get('type');
-            
-            const code = queryParams.get('code');
+    const SUPABASE_URL = "https://jyfetcmnjyxzlreujjqt.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_dIWOdPTV6QYFaWe5OsV9ZA_ONc35u_M";
 
-            const loadingState = document.getElementById('loading-state');
-            const successState = document.getElementById('success-state');
-            const errorState = document.getElementById('error-state');
-            const errorMessageEl = document.getElementById('error-message');
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            setTimeout(() => {
-                loadingState.style.display = 'none';
+    const loadingState = document.getElementById('loading-state');
+    const successState = document.getElementById('success-state');
+    const errorState = document.getElementById('error-state');
+    const errorMessageEl = document.getElementById('error-message');
 
-                if (error) {
-                    errorState.style.display = 'block';
-                    if (errorDescription) {
-                        errorMessageEl.textContent = errorDescription.replace(/\+/g, ' ');
-                    }
-                } else if (accessToken || type === 'signup' || code) {
-                    successState.style.display = 'block';
-                } else {
-                    errorState.style.display = 'block';
-                    errorMessageEl.textContent = "Link verifikasi tidak lengkap. Pastikan Anda mengklik link langsung dari email.";
-                }
-            }, 800);
-        });
-    </script>
+    try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (data.session) {
+            successState.style.display = 'block';
+        } else {
+            throw new Error("Token tidak valid atau sudah expired.");
+        }
+    } catch (err) {
+        errorState.style.display = 'block';
+        errorMessageEl.textContent = err.message;
+    } finally {
+        loadingState.style.display = 'none';
+    }
+
+});
+</script>
    </body>
 </html>
